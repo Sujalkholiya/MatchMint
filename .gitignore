@@ -40,3 +40,7 @@ backend/database/*.db-shm
 # Environment variables
 .env
 
+# Local backups
+Context_local_backup/
+
+

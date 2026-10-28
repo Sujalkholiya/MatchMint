@@ -51,10 +51,10 @@ export const CreateCompetition: React.FC<CreateCompetitionProps> = ({
     }
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setError(null);
     try {
-      const comp = StorageService.createCompetition({
+      const comp = await StorageService.createCompetition({
         name: name.trim(),
         category,
         format,
@@ -64,10 +64,10 @@ export const CreateCompetition: React.FC<CreateCompetitionProps> = ({
       });
 
       if (generateNow) {
-        const teams = StorageService.getTeams(comp.id);
+        const teams = await StorageService.getTeams(comp.id);
         if (teams.length < 2) {
           for (let i = 1; i <= teamCount; i++) {
-            StorageService.registerTeam({
+            await StorageService.registerTeam({
               competitionId: comp.id,
               name: `Team ${String.fromCharCode(64 + i)}`,
               captain: `Captain ${i}`,
@@ -75,7 +75,7 @@ export const CreateCompetition: React.FC<CreateCompetitionProps> = ({
             });
           }
         }
-        StorageService.generateFixturesForCompetition(comp.id);
+        await StorageService.generateFixturesForCompetition(comp.id);
       }
 
       onCreated(comp, generateNow);

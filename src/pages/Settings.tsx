@@ -11,8 +11,8 @@ export const Settings: React.FC<SettingsProps> = ({ onResetData }) => {
   const [resetSuccess, setResetSuccess] = useState(false);
   const [importMessage, setImportMessage] = useState<string | null>(null);
 
-  const handleExportJSON = () => {
-    const jsonStr = StorageService.exportDatabaseJSON();
+  const handleExportJSON = async () => {
+    const jsonStr = await StorageService.exportDatabaseJSON();
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -27,9 +27,9 @@ export const Settings: React.FC<SettingsProps> = ({ onResetData }) => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const content = event.target?.result as string;
-      const success = StorageService.importDatabaseJSON(content);
+      const success = await StorageService.importDatabaseJSON(content);
       if (success) {
         setImportMessage('Backup restored successfully. Refreshing view...');
         setTimeout(() => {
@@ -42,8 +42,9 @@ export const Settings: React.FC<SettingsProps> = ({ onResetData }) => {
     reader.readAsText(file);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (window.confirm('Reset all competitions, teams, and matches to default sample data?')) {
+      await StorageService.resetToDefaults();
       onResetData();
       setResetSuccess(true);
       setTimeout(() => setResetSuccess(false), 3000);

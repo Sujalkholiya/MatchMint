@@ -50,20 +50,26 @@ export function App() {
   // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  const reloadData = () => {
-    const c = StorageService.getCompetitions();
-    const t = StorageService.getTeams();
-    const m = StorageService.getMatches();
-    const h = StorageService.getHistory();
+  const reloadData = async () => {
+    try {
+      const [c, t, m, h] = await Promise.all([
+        StorageService.getCompetitions(),
+        StorageService.getTeams(),
+        StorageService.getMatches(),
+        StorageService.getHistory(),
+      ]);
 
-    setCompetitions(c);
-    setTeams(t);
-    setMatches(m);
-    setHistory(h);
+      setCompetitions(c);
+      setTeams(t);
+      setMatches(m);
+      setHistory(h);
 
-    if (selectedCompetition) {
-      const refreshed = c.find((comp) => comp.id === selectedCompetition.id);
-      if (refreshed) setSelectedCompetition(refreshed);
+      if (selectedCompetition) {
+        const refreshed = c.find((comp) => comp.id === selectedCompetition.id);
+        if (refreshed) setSelectedCompetition(refreshed);
+      }
+    } catch (err) {
+      console.error('[MatchMint] Failed to load data from backend:', err);
     }
   };
 
@@ -93,7 +99,7 @@ export function App() {
       window.history.pushState({}, '', '/app');
     }
     if (competitionId) {
-      const c = StorageService.getCompetitions().find((comp) => comp.id === competitionId);
+      const c = competitions.find((comp) => comp.id === competitionId);
       if (c) {
         setSelectedCompetition(c);
         setCurrentTab('competition_details');
@@ -126,35 +132,35 @@ export function App() {
     setScheduleModalMatch(match);
   };
 
-  const handleEnterResultSubmit = (
+  const handleEnterResultSubmit = async (
     matchId: string,
     team1Score: number,
     team2Score: number,
     tieBreakerDetail?: string
   ) => {
-    const res = StorageService.submitResult(matchId, team1Score, team2Score, tieBreakerDetail);
+    const res = await StorageService.submitResult(matchId, team1Score, team2Score, tieBreakerDetail);
     if (res.success) {
-      reloadData();
+      await reloadData();
       showToast(res.message, 'success');
     } else {
       showToast(res.message, 'error');
     }
   };
 
-  const handleUndoResult = (historyId: string) => {
-    const res = StorageService.rollbackResult(historyId);
+  const handleUndoResult = async (historyId: string) => {
+    const res = await StorageService.rollbackResult(historyId);
     if (res.success) {
-      reloadData();
+      await reloadData();
       showToast(res.message, 'success');
     } else {
       showToast(res.message, 'error');
     }
   };
 
-  const handleGenerateFixtures = (comp: Competition) => {
-    const res = StorageService.generateFixturesForCompetition(comp.id);
+  const handleGenerateFixtures = async (comp: Competition) => {
+    const res = await StorageService.generateFixturesForCompetition(comp.id);
     if (res.success) {
-      reloadData();
+      await reloadData();
       showToast(res.message, 'success');
     } else {
       showToast(res.message, 'error');
@@ -323,8 +329,8 @@ export function App() {
 
           {currentTab === 'create_competition' && (
             <CreateCompetition
-              onCreated={(newComp) => {
-                reloadData();
+              onCreated={async (newComp) => {
+                await reloadData();
                 handleSelectCompetition(newComp);
                 showToast(`Tournament "${newComp.name}" created.`, 'success');
               }}

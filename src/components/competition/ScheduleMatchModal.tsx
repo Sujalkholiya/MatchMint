@@ -35,20 +35,25 @@ export const ScheduleMatchModal: React.FC<ScheduleMatchModalProps> = ({
 
   if (!match || !competition) return null;
 
-  const handleTimeOrVenueChange = (newTime: string, newVenue: string) => {
+  const handleTimeOrVenueChange = async (newTime: string, newVenue: string) => {
     setScheduledTime(newTime);
     setVenue(newVenue);
 
-    const matches = StorageService.getMatches().map((m) =>
-      m.id === match.id ? { ...m, scheduledTime: newTime, venue: newVenue } : m
-    );
-    const detected = TournamentEngine.detectSchedulingConflicts(competition, matches);
-    setConflicts(detected);
+    try {
+      const allMatches = await StorageService.getMatches(competition.id);
+      const matches = allMatches.map((m) =>
+        m.id === match.id ? { ...m, scheduledTime: newTime, venue: newVenue } : m
+      );
+      const detected = TournamentEngine.detectSchedulingConflicts(competition, matches);
+      setConflicts(detected);
+    } catch {
+      // fallback
+    }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    StorageService.rescheduleMatch(match.id, scheduledTime, venue);
+    await StorageService.rescheduleMatch(match.id, scheduledTime, venue);
     onScheduled();
     onClose();
   };

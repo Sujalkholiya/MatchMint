@@ -36,7 +36,7 @@ export const RegisterTeamModal: React.FC<RegisterTeamModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setError('Please provide a team name.');
@@ -54,20 +54,24 @@ export const RegisterTeamModal: React.FC<RegisterTeamModalProps> = ({
     const members = parseInt(membersCount, 10) || 5;
     const tag = name.trim().substring(0, 3).toUpperCase();
 
-    StorageService.registerTeam({
-      competitionId: selectedCompId,
-      name: name.trim(),
-      captain: captain.trim(),
-      email: `${tag.toLowerCase()}.lead@campus.edu`,
-      rosterCount: members,
-    });
+    try {
+      await StorageService.registerTeam({
+        competitionId: selectedCompId,
+        name: name.trim(),
+        captain: captain.trim(),
+        email: `${tag.toLowerCase()}.lead@campus.edu`,
+        rosterCount: members,
+      });
 
-    onRegistered();
-    setName('');
-    setCaptain('');
-    setMembersCount('5');
-    setError(null);
-    onClose();
+      onRegistered();
+      setName('');
+      setCaptain('');
+      setMembersCount('5');
+      setError(null);
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to register team.');
+    }
   };
 
   return (

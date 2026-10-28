@@ -22,3 +22,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# C build artifacts & executables
+backend/build/
+*.exe
+*.o
+*.obj
+*.a
+*.lib
+
+# SQLite database local files
+backend/database/*.db
+backend/database/*.db-wal
+backend/database/*.db-shm
+*.db
+
+# Environment variables
+.env
+
+# Local backups
+Context_local_backup/
+
+

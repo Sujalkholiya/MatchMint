@@ -17,6 +17,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Find SQLite3
 find_package(SQLite3 REQUIRED)
+if(NOT TARGET SQLite3::SQLite3 AND TARGET SQLite::SQLite3)
+    add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+endif()
 
 # DSA source files
 set(DSA_SOURCES

@@ -91,7 +91,7 @@ MatchMint includes high-fidelity React component mockups as fallbacks for all im
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/matchmint.git
+git clone https://github.com/Sujalkholiya/matchmint.git
 cd matchmint
 
 # Install dependencies
